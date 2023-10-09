@@ -25,6 +25,45 @@
                 padding: 15px;
             }
         </style>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const form = document.getElementById("userForm");
+
+                form.addEventListener("submit", (event) => {
+                    event.preventDefault(); // Prevent the default form submission
+
+                    const formData = {
+                        first_name: document.getElementById("firstName").value,
+                        last_name: document.getElementById("lastName").value,
+                        license_no:
+                            document.getElementById("licenseNumber").value,
+                        age: document.getElementById("age").value,
+                        make: document.getElementById("make").value,
+                        model: document.getElementById("model").value,
+                        year: document.getElementById("year").value,
+                        plat_no: document.getElementById("plateNumber").value,
+                    };
+
+                    fetch("http://localhost:3000/api/users", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(formData),
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            console.log(data);
+                            alert("Data Saved Successfully");
+                            window.location.href = "/g";
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                            alert(error + "Data not saved successfully.");
+                        });
+                });
+            });
+        </script>
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
@@ -55,7 +94,7 @@
                             <h5 class="card-title mt-3">
                                 Personal Information
                             </h5>
-                            <form class="text-start">
+                            <form class="text-start" id="userForm">
                                 <div class="form-row">
                                     <div class="form-group my-2 col-md-12">
                                         <label for="firstName"
