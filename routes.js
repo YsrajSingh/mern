@@ -28,7 +28,6 @@ router.get("/login", (req, res) => {
 
 // Create a new user
 router.post("/api/users", async (req, res) => {
-    console.log(req.body);
     const {
         first_name,
         last_name,
