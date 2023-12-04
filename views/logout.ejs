@@ -25,28 +25,37 @@
                 padding: 15px;
             }
         </style>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const logout_form = document.getElementById("logout_form");
+
+                function deleteCookie(name) {
+                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                }
+
+                logout_form.addEventListener("submit", (event) => {
+                    event.preventDefault(); // Prevent the default form submission
+
+                    deleteCookie("ilu_order_xyz_panel");
+                    window.location.href = "/login";
+                });
+            });
+        </script>
     </head>
     <body>
         <%- include('./common/header.ejs') %>
 
         <div class="container-fluid text-center">
-            <div class="row content">
-                <div class="col-sm-12 text-left">
-                    <div
-                        style="min-height: 250px"
-                        class="justify-content-center align-content-center d-flex flex-column"
-                    >
-                        <h1>Dashboard</h1>
-                        <p>Drive Test Booking Koisk</p>
+            <div class="row justify-content-center">
+                <div class="col-md-10 my-5">
+                    <div class="card">
+                        <div class="card-header">Want to Logout ?</div>
+                        <form class="text-center p-5" id="logout_form">
+                            <button type="submit" class="btn btn-primary m-2">
+                                Logout
+                            </button>
+                        </form>
                     </div>
-                    <hr />
-                    <h2 class="font-weight-bold">
-                        You can book G2/G drive test from Kiosk
-                    </h2>
-                    <p style="font-size: 24px" class="display-6">
-                        You can book G2/G drive test from Kiosk.
-                    </p>
-                    <i> Posted by <b>DriveTest Center</b> </i>
                 </div>
             </div>
         </div>

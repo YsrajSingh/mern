@@ -28,7 +28,123 @@
         <script>
             document.addEventListener("DOMContentLoaded", () => {
                 const form = document.getElementById("userForm");
+                const parent_of_form =
+                    document.getElementById("parent_of_form");
+                const show_user_data =
+                    document.getElementById("show_user_data");
+                const take_retest_button =
+                    document.getElementById("take_retest");
+                show_user_data.style.display = "none";
+                take_retest_button.style.display = "none";
 
+                // Fetch user data and populate the form
+                fetch(`http://localhost:3000/api/filter/user`, {
+                    method: "GET",
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data?.error) {
+                            alert(JSON.stringify(data?.error));
+                            window.location.href = "/g2";
+                        } else {
+                            // Populate the read-only fields with user data
+                            if (data?.license_no) {
+                                show_user_data.style.display = "block";
+                                parent_of_form.style.display = "none";
+                                document.getElementById(
+                                    "table_first_name"
+                                ).innerText = data?.first_name;
+                                document.getElementById(
+                                    "table_last_name"
+                                ).innerText = data?.last_name;
+                                document.getElementById(
+                                    "table_license_number"
+                                ).innerText = data?.license_no;
+                                document.getElementById(
+                                    "license_no"
+                                ).style.display = "none";
+                                document.getElementById("table_age").innerText =
+                                    data?.age;
+                                document.getElementById(
+                                    "table_make"
+                                ).innerText = data?.car_details?.make;
+                                document.getElementById(
+                                    "table_model"
+                                ).innerText = data?.car_details?.model;
+                                document.getElementById(
+                                    "table_year"
+                                ).innerText = data?.car_details?.year;
+                                document.getElementById(
+                                    "table_plate"
+                                ).innerText = data?.car_details?.plat_no;
+                                const rawDate = data?.appointments[0]?.date;
+                                const formattedDate = new Date(
+                                    rawDate
+                                ).toLocaleDateString();
+                                document.getElementById(
+                                    "table_date"
+                                ).innerText = formattedDate;
+                                document.getElementById(
+                                    "table_time"
+                                ).innerText = data?.appointments[0]?.time;
+                                document.getElementById("pass_fail").innerText =
+                                    data?.isPass == true
+                                        ? "Pass"
+                                        : data?.isPass == false
+                                        ? "Fail"
+                                        : "Result Pending";
+                                document.getElementById("feedback").innerText =
+                                    data?.comments || "Result Pending";
+                                if (data?.isPass == false) {
+                                    take_retest_button.style.display = "block";
+                                } else {
+                                    document.getElementById(
+                                        "appointment_date"
+                                    ).style.display = "none";
+                                    document.getElementById(
+                                        "appointment_time"
+                                    ).style.display = "none";
+                                }
+                                document.getElementById(
+                                    "dob_group"
+                                ).style.display = "none";
+
+                                document.getElementById("firstName").value =
+                                    data?.first_name;
+                                document.getElementById(
+                                    "firstName"
+                                ).disabled = true;
+                                document.getElementById("lastName").value =
+                                    data?.last_name;
+                                document.getElementById(
+                                    "lastName"
+                                ).disabled = true;
+                                document.getElementById("licenseNumber").value =
+                                    data?.license_no;
+                                document.getElementById(
+                                    "licenseNumber"
+                                ).disabled = true;
+                                document.getElementById("age").value =
+                                    data?.age;
+                                document.getElementById("age").disabled = true;
+                                document.getElementById("make").value =
+                                    data?.car_details?.make;
+                                document.getElementById("model").value =
+                                    data?.car_details?.model;
+                                document.getElementById("year").value =
+                                    data?.car_details?.year;
+                                document.getElementById("plateNumber").value =
+                                    data?.car_details?.plat_no;
+                                // alert("Data already saved successfully");
+                                // window.location.href = "/g";
+                            }
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        alert("No Data Found");
+                        window.location.reload();
+                    });
                 form.addEventListener("submit", (event) => {
                     event.preventDefault(); // Prevent the default form submission
 
@@ -42,6 +158,9 @@
                         model: document.getElementById("model").value,
                         year: document.getElementById("year").value,
                         plat_no: document.getElementById("plateNumber").value,
+                        date: document.getElementById("date").value,
+                        time: document.getElementById("time").value,
+                        test_type: "G2",
                     };
 
                     fetch("http://localhost:3000/api/users", {
@@ -53,8 +172,12 @@
                     })
                         .then((response) => response.json())
                         .then((data) => {
-                            alert("Data Saved Successfully");
-                            window.location.href = "/g";
+                            if (data?.error) {
+                                alert(data?.error);
+                            } else {
+                                alert("Data Saved Successfully");
+                                window.location.reload();
+                            }
                         })
                         .catch((error) => {
                             console.error(error);
@@ -65,27 +188,11 @@
         </script>
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-            <a class="navbar-brand" href="/">BOOK DRIVE TEST</a>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/dashboard">DASHBOARD</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/g2">G_2 TEST</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/g">G TEST</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">LOGIN</a>
-                </li>
-            </ul>
-        </nav>
+        <%- include('./common/header.ejs') %>
 
         <div class="container-fluid text-center">
             <div class="row justify-content-center">
-                <div class="col-md-8 my-4">
+                <div class="col-md-8 my-4" id="parent_of_form">
                     <div class="card">
                         <div class="card-header">User Data Entry</div>
                         <div class="card-body">
@@ -138,7 +245,7 @@
                                         />
                                     </div>
                                 </div>
-                                <div class="form-group my-2">
+                                <div class="form-group my-2" id="dob_group">
                                     <label for="dob">Date of Birth</label>
                                     <input
                                         type="date"
@@ -194,6 +301,39 @@
                                     </div>
                                 </div>
 
+                                <!-- Appointment Information Section -->
+                                <h5 class="card-title text-center mt-5">
+                                    Choose Appointment
+                                </h5>
+
+                                <div class="form-row">
+                                    <div class="form-group my-2 col-md-12">
+                                        <label for="date">Date</label>
+                                        <input
+                                            type="date"
+                                            class="form-control"
+                                            id="date"
+                                            required
+                                            placeholder="Choose Date"
+                                            onchange="fetchTimeSlots()"
+                                        />
+                                    </div>
+                                    <div class="form-group my-2 col-md-12">
+                                        <label for="time">Time</label>
+                                        <select
+                                            name="time"
+                                            class="form-control"
+                                            id="time"
+                                            required
+                                            placeholder="Choose Time Slot"
+                                        >
+                                            <option value="">
+                                                Choose Time Slot
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <!-- Submit Button -->
                                 <button type="submit" class="btn btn-primary">
                                     Submit
@@ -202,10 +342,131 @@
                         </div>
                     </div>
                 </div>
+                <div id="loadingMessage" style="display: none">Loading...</div>
+                <div class="col-md-8 my-4" id="show_user_data">
+                    <table class="table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">First Name</th>
+                                <td scope="col" id="table_first_name"></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Last Name</th>
+                                <td id="table_last_name"></td>
+                            </tr>
+                            <tr id="license_no">
+                                <th scope="row">Encrypted License Number</th>
+                                <td id="table_license_number"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Age</th>
+                                <td id="table_age"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Car-Make</th>
+                                <td id="table_make"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Car-Model</th>
+                                <td id="table_model"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Car-Year</th>
+                                <td id="table_year"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Car-Plate</th>
+                                <td id="table_plate"></td>
+                            </tr>
+                            <tr id="appointment_date">
+                                <th scope="row">Appointment Date</th>
+                                <td id="table_date"></td>
+                            </tr>
+                            <tr id="appointment_time">
+                                <th scope="row">Appointment Time</th>
+                                <td id="table_time"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Are you pass ?</th>
+                                <td id="pass_fail"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Feedback</th>
+                                <td id="feedback"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button
+                        type="button"
+                        class="btn btn-warning"
+                        id="take_retest"
+                        onclick="handleRetest()"
+                    >
+                        Take Retest
+                    </button>
+                </div>
             </div>
         </div>
         <footer class="container-fluid text-center">
             <p>Update soon</p>
         </footer>
+
+        <script>
+            // Define fetchTimeSlots function
+            function fetchTimeSlots() {
+                const selectedDate = document.getElementById("date").value;
+                const timeSelect = document.getElementById("time");
+                const loadingMessage =
+                    document.getElementById("loadingMessage");
+
+                timeSelect.innerHTML =
+                    '<option value="">Choose Time Slot</option>';
+
+                if (selectedDate) {
+                    loadingMessage.style.display = "block";
+
+                    // Fetch time slots based on the selected date
+                    fetch(
+                        `http://localhost:3000/api/single/appointments?date=${selectedDate}`,
+                        {
+                            method: "GET",
+                        }
+                    )
+                        .then((response) => response.json())
+                        .then((data) => {
+                            loadingMessage.style.display = "none";
+
+                            if (data?.error) {
+                                alert(JSON.stringify(data?.error));
+                            } else {
+                                // Populate the time slots dropdown with fetched data
+                                data.forEach((appointment) => {
+                                    const option =
+                                        document.createElement("option");
+                                    option.value = appointment.time;
+                                    option.text = appointment.time;
+                                    timeSelect.appendChild(option);
+                                });
+                            }
+                        })
+                        .catch((error) => {
+                            loadingMessage.style.display = "none";
+                            console.error(error);
+                        });
+                }
+            }
+
+            function handleRetest() {
+                show_user_data.style.display = "none";
+                parent_of_form.style.display = "block";
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                // Now call fetchTimeSlots
+                fetchTimeSlots();
+            });
+        </script>
     </body>
 </html>

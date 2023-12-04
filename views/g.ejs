@@ -27,60 +27,64 @@
         </style>
         <script>
             document.addEventListener("DOMContentLoaded", () => {
-                const form = document.getElementById("license_form");
                 const updateForm = document.getElementById("updateUserForm");
-                const updateFormParent =
-                    document.getElementById("updateFormParent");
 
-                form.addEventListener("submit", (event) => {
-                    event.preventDefault(); // Prevent the default form submission
-                    const l_no = document.getElementById("licenseNumber").value;
+                // Fetch user data and populate the form
+                fetch(`http://localhost:3000/api/filter/user`, {
+                    method: "GET",
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data?.error) {
+                            alert(JSON.stringify(data?.error));
+                            window.location.href = "/g2";
+                        } else {
 
-                    fetch(`http://localhost:3000/api/users/${l_no}`, {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    })
-                        .then((response) => response.json())
-                        .then((data) => {
-                            if (data?.error) {
-                                alert("No User Found");
-                                window.location.href = "/g2";
-                            } else {
-                                alert("User Found Successfully");
-                                updateForm.id.value = data._id;
-                                updateForm.firstName.value = data.first_name;
-                                updateForm.lastName.value = data.last_name;
-                                updateForm.licenseNumber.value =
-                                    data.license_no;
-                                updateForm.age.value = data.age;
-                                updateForm.make.value = data.car_details.make;
-                                updateForm.model.value = data.car_details.model;
-                                updateForm.year.value = data.car_details.year;
-                                updateForm.plateNumber.value =
-                                    data.car_details.plat_no;
-                                updateFormParent.classList.remove("d-none");
+                            if(data?.isPass !== true){
+                                alert("First you need to pass G2 test, Redirecting....")
+                                window.location.href = "/g2"
                             }
-                        })
-                        .catch((error) => {
-                            alert("No Data Found");
-                            window.location.reload();
-                            console.error(error);
-                        });
-                });
+                            const timeInput = document.getElementById('time');
+                            const dateInput = document.getElementById('date');
+                            // Populate the read-only fields with user data
+                            updateForm.firstName.value = data.first_name;
+                            updateForm.lastName.value = data.last_name;
+                            updateForm.licenseNumber.value = data.license_no;
+                            updateForm.age.value = data.age;
+                            // updateForm.username.value = data.username;
+                            // updateForm.user_type.value = data.user_type;
+                            // Populate the editable fields with user's car information
+                            updateForm.make.value = data.car_details.make;
+                            updateForm.model.value = data.car_details.model;
+                            updateForm.year.value = data.car_details.year;
+                            updateForm.plateNumber.value =
+                                data.car_details.plat_no;
+                            document.getElementById("appointment_label").style.display = "none"
+                            document.getElementById("appointment_form").style.display = "none"
+                            document.getElementById("submit_button").style.display = "none"
+                            
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        alert("No Data Found");
+                        window.location.href = "/g2";
+                    });
 
                 updateForm.addEventListener("submit", (event) => {
                     event.preventDefault(); // Prevent the default form submission
-                    const user_id = document.getElementById("id").value;
+                    // Collect and send updated car information
                     const formData = {
                         make: document.getElementById("make").value,
                         model: document.getElementById("model").value,
                         year: document.getElementById("year").value,
                         plat_no: document.getElementById("plateNumber").value,
+                        date: document.getElementById("date").value,
+                        time: document.getElementById("time").value,
+                        test_type: "G",
                     };
 
-                    fetch(`http://localhost:3000/api/users/${user_id}`, {
+                    fetch(`http://localhost:3000/api/update/user`, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -101,54 +105,14 @@
         </script>
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-            <a class="navbar-brand" href="/">BOOK DRIVE TEST</a>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/dashboard">DASHBOARD</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/g2">G_2 TEST</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/g">G TEST</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">LOGIN</a>
-                </li>
-            </ul>
-        </nav>
-
+        <%- include('./common/header.ejs') %>
         <div class="container-fluid text-center">
             <div class="row justify-content-center">
-                <div class="col-md-6 my-5">
+                <div class="col-md-10 my-5" id="updateFormParent">
                     <div class="card">
-                        <div class="card-header">License Lookup</div>
-                        <div class="card-body">
-                            <form class="text-start" id="license_form">
-                                <div class="form-group p-2">
-                                    <label for="licenseNumber" class="py-2"
-                                        >License Number</label
-                                    >
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="licenseNumber"
-                                        placeholder="Enter License Number"
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    class="m-2 btn btn-primary"
-                                >
-                                    Lookup
-                                </button>
-                            </form>
+                        <div id="loadingMessage" style="display: none">
+                            Loading...
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-10 my-5 d-none" id="updateFormParent">
-                    <div class="card">
                         <div class="card-header">Update User Details</div>
                         <div class="card-body">
                             <!-- Personal Information Section -->
@@ -194,7 +158,9 @@
                                     </div>
                                 </div>
                                 <div class="form-row">
-                                    <div class="form-group my-2 col-md-12">
+                                    <div
+                                        class="form-group my-2 col-md-12 d-none"
+                                    >
                                         <label for="licenseNumber"
                                             >License Number</label
                                         >
@@ -217,6 +183,30 @@
                                         />
                                     </div>
                                 </div>
+                                <!-- <div class="form-row">
+                                    <div class="form-group my-2 col-md-12">
+                                        <label for="licenseNumber"
+                                            >User Name</label
+                                        >
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="username"
+                                            disabled
+                                            placeholder="User Name"
+                                        />
+                                    </div>
+                                    <div class="form-group my-2 col-md-12">
+                                        <label for="age">User Type</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="user_type"
+                                            disabled
+                                            placeholder="User Type"
+                                        />
+                                    </div>
+                                </div> -->
 
                                 <!-- Car Information Section -->
                                 <h5 class="card-title text-center mt-5">
@@ -266,8 +256,41 @@
                                     </div>
                                 </div>
 
+                                <!-- Appointment Information Section -->
+                                <h5 class="card-title text-center mt-5" id="appointment_label">
+                                    Choose Appointment OR Update Appointment
+                                </h5>
+
+                                <div class="form-row" id="appointment_form">
+                                    <div class="form-group my-2 col-md-12">
+                                        <label for="date">Date</label>
+                                        <input
+                                            type="date"
+                                            class="form-control"
+                                            id="date"
+                                            required
+                                            placeholder="Choose Date"
+                                            onchange="fetchTimeSlots()"
+                                        />
+                                    </div>
+                                    <div class="form-group my-2 col-md-12">
+                                        <label for="time">Time</label>
+                                        <select
+                                            name="time"
+                                            class="form-control"
+                                            id="time"
+                                            required
+                                            placeholder="Choose Time Slot"
+                                        >
+                                            <option value="">
+                                                Choose Time Slot
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <!-- Submit Button -->
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary" id="submit_button">
                                     Submit
                                 </button>
                             </form>
@@ -279,5 +302,55 @@
         <footer class="container-fluid text-center">
             <p>Update soon</p>
         </footer>
+        <script>
+            // Define fetchTimeSlots function
+            function fetchTimeSlots() {
+                const selectedDate = document.getElementById("date").value;
+                const timeSelect = document.getElementById("time");
+                const loadingMessage =
+                    document.getElementById("loadingMessage");
+
+                timeSelect.innerHTML =
+                    '<option value="">Choose Time Slot</option>';
+
+                if (selectedDate) {
+                    loadingMessage.style.display = "block";
+
+                    // Fetch time slots based on the selected date
+                    fetch(
+                        `http://localhost:3000/api/single/appointments?date=${selectedDate}`,
+                        {
+                            method: "GET",
+                        }
+                    )
+                        .then((response) => response.json())
+                        .then((data) => {
+                            loadingMessage.style.display = "none";
+
+                            if (data?.error) {
+                                alert(JSON.stringify(data?.error));
+                            } else {
+                                // Populate the time slots dropdown with fetched data
+                                data.forEach((appointment) => {
+                                    const option =
+                                        document.createElement("option");
+                                    option.value = appointment.time;
+                                    option.text = appointment.time;
+                                    timeSelect.appendChild(option);
+                                });
+                            }
+                        })
+                        .catch((error) => {
+                            loadingMessage.style.display = "none";
+                            console.error(error);
+                        });
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                // Now call fetchTimeSlots
+                fetchTimeSlots();
+            });
+        </script>
     </body>
 </html>

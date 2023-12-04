@@ -25,6 +25,7 @@ app.use("/", routes);
 const port = process.env.PORT || 3000;
 
 // Start the server only when the MongoDB connection is established
+
 db.once("open", () => {
     app.listen(port, () => {
         console.log(`Server is running on : http://localhost:${port}`);

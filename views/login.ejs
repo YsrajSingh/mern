@@ -25,49 +25,101 @@
                 padding: 15px;
             }
         </style>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const registration_form =
+                    document.getElementById("registration_form");
+                const login_form = document.getElementById("login_form");
+
+                registration_form.addEventListener("submit", (event) => {
+                    event.preventDefault(); // Prevent the default form submission
+                    const formData = {
+                        username:
+                            document.getElementById("exampleInputEmail").value,
+                        password: document.getElementById(
+                            "exampleInputPassword1"
+                        ).value,
+                        confirm_password: document.getElementById(
+                            "exampleInputPassword2"
+                        ).value,
+                        user_type: document.getElementById(
+                            "exampleInputUserType"
+                        ).value,
+                    };
+
+                    fetch("http://localhost:3000/api/registration", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(formData),
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data?.error) {
+                                alert(data?.error);
+                            } else {
+                                alert("Registration Successful");
+                                window.location.href = "/";
+                            }
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                            alert(error + "Error");
+                        });
+                });
+
+                login_form.addEventListener("submit", (event) => {
+                    event.preventDefault(); // Prevent the default form submission
+                    const formData = {
+                        username: document.getElementById("login_email").value,
+                        password:
+                            document.getElementById("login_password").value,
+                    };
+
+                    fetch("http://localhost:3000/api/login", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(formData),
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data?.error) {
+                                alert(data?.error);
+                            } else {
+                                alert("Logged-In Successfully");
+                                window.location.href = "/";
+                            }
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                            alert(error + "Error");
+                        });
+                });
+            });
+        </script>
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-            <a class="navbar-brand" href="/">BOOK DRIVE TEST</a>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/dashboard">DASHBOARD</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/g2">G_2 TEST</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/g">G TEST</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">LOGIN</a>
-                </li>
-            </ul>
-        </nav>
+        <%- include('./common/header.ejs') %>
 
         <div class="container-fluid text-center">
             <div class="row justify-content-center">
-                <div class="col-md-6 my-5">
+                <div class="col-md-5 my-5">
                     <div class="card">
-                        <div class="card-header">Login</div>
-                        <form class="text-start p-5">
+                        <div class="card-header">Sign Up</div>
+                        <form class="text-start p-5" id="registration_form">
                             <div class="form-group p-2">
-                                <label for="exampleInputEmail1"
-                                    >Email address</label
-                                >
+                                <label for="exampleInputEmail">User Name</label>
                                 <input
-                                    type="email"
+                                    type="text"
                                     class="form-control"
-                                    id="exampleInputEmail1"
+                                    id="exampleInputEmail"
+                                    required
                                     aria-describedby="emailHelp"
-                                    placeholder="Enter email"
+                                    placeholder="Enter Username"
                                 />
-                                <small
-                                    id="emailHelp"
-                                    class="form-text text-muted"
-                                    >We'll never share your email with anyone
-                                    else.</small
-                                >
                             </div>
                             <div class="form-group p-2">
                                 <label for="exampleInputPassword1"
@@ -76,23 +128,82 @@
                                 <input
                                     type="password"
                                     class="form-control"
+                                    required
                                     id="exampleInputPassword1"
                                     placeholder="Password"
                                 />
                             </div>
+                            <div class="form-group p-2">
+                                <label for="exampleInputPassword2"
+                                    >Confirm Password</label
+                                >
+                                <input
+                                    type="password"
+                                    class="form-control"
+                                    required
+                                    id="exampleInputPassword2"
+                                    placeholder="Confirm Password"
+                                />
+                            </div>
+                            <div class="form-group p-2">
+                                <label for="exampleInputUserType"
+                                    >User Type</label
+                                >
+                                <select
+                                    name="exampleInputUserType"
+                                    class="form-control"
+                                    id="exampleInputUserType"
+                                    required
+                                >
+                                    <option class="form-control" value="driver">
+                                        Driver
+                                    </option>
+                                    <option
+                                        class="form-control"
+                                        value="examiner"
+                                    >
+                                        Examiner
+                                    </option>
+                                    <option class="form-control" value="admin">
+                                        Admin
+                                    </option>
+                                </select>
+                            </div>
                             <button type="submit" class="btn btn-primary m-2">
-                                Submit
+                                Sign Up
                             </button>
                         </form>
-                        <div class="card-body">
-                            <!-- Placeholder content -->
-                            <p class="text-center">
-                                This page is under construction.
-                            </p>
-                            <p class="text-center">
-                                Login functionality will be added later.
-                            </p>
-                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5 my-5">
+                    <div class="card">
+                        <div class="card-header">Login</div>
+                        <form class="text-start p-5" id="login_form">
+                            <div class="form-group p-2">
+                                <label for="login_email">User Name</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="login_email"
+                                    required
+                                    aria-describedby="emailHelp"
+                                    placeholder="Enter Username"
+                                />
+                            </div>
+                            <div class="form-group p-2">
+                                <label for="login_password">Password</label>
+                                <input
+                                    type="password"
+                                    class="form-control"
+                                    required
+                                    id="login_password"
+                                    placeholder="Password"
+                                />
+                            </div>
+                            <button type="submit" class="btn btn-primary m-2">
+                                Login
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
