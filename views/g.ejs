@@ -28,7 +28,9 @@
         <script>
             document.addEventListener("DOMContentLoaded", () => {
                 const updateForm = document.getElementById("updateUserForm");
-
+                document.getElementById("time_display").style.display = "none";
+                document.getElementById("result_label").style.display = "none";
+                document.getElementById("result_form").style.display = "none";
                 // Fetch user data and populate the form
                 fetch(`http://localhost:3000/api/filter/user`, {
                     method: "GET",
@@ -39,13 +41,35 @@
                             alert(JSON.stringify(data?.error));
                             window.location.href = "/g2";
                         } else {
-
-                            if(data?.isPass !== true){
-                                alert("First you need to pass G2 test, Redirecting....")
-                                window.location.href = "/g2"
+                            if (
+                                data?.isPass !== true &&
+                                data?.test_type == "G2"
+                            ) {
+                                alert(
+                                    "First you need to pass G2 test, Redirecting...."
+                                );
+                                window.location.href = "/g2";
                             }
-                            const timeInput = document.getElementById('time');
-                            const dateInput = document.getElementById('date');
+
+                            if (
+                                data?.isPass !== null &&
+                                data?.test_type == "G"
+                            ) {
+                                document.getElementById(
+                                    "result_label"
+                                ).style.display = "block";
+                                document.getElementById(
+                                    "result_form"
+                                ).style.display = "block";
+                                document.getElementById(
+                                    "result_pass"
+                                ).innerText = data?.isPass === true ? "Pass" : data?.isPass === false ? "Fail" : "Result Awaited";
+                                document.getElementById(
+                                    "result_feedback"
+                                ).innerText = data?.comments || "Result Awaited";
+                            }
+                            const timeInput = document.getElementById("time");
+                            const dateInput = document.getElementById("date");
                             // Populate the read-only fields with user data
                             updateForm.firstName.value = data.first_name;
                             updateForm.lastName.value = data.last_name;
@@ -59,7 +83,32 @@
                             updateForm.year.value = data.car_details.year;
                             updateForm.plateNumber.value =
                                 data.car_details.plat_no;
-                            
+                            if (data?.test_type === "G") {
+                                updateForm.make.disabled = true;
+                                updateForm.model.disabled = true;
+                                updateForm.year.disabled = true;
+                                updateForm.plateNumber.disabled = true;
+
+                                updateForm.date.type = "text";
+                                updateForm.time.type = "text";
+                                updateForm.date.value =
+                                    data.appointments[0].date;
+                                updateForm.time_display.value =
+                                    data.appointments[0].time;
+                                updateForm.date.disabled = true;
+                                updateForm.time.disabled = true;
+                                document.getElementById(
+                                    "appointment_label"
+                                ).innerText = "Appointment Details";
+                                document.getElementById(
+                                    "submit_button"
+                                ).style.display = "none";
+                                document.getElementById("time").style.display =
+                                    "none";
+                                document.getElementById(
+                                    "time_display"
+                                ).style.display = "block";
+                            }
                         }
                     })
                     .catch((error) => {
@@ -254,7 +303,10 @@
                                 </div>
 
                                 <!-- Appointment Information Section -->
-                                <h5 class="card-title text-center mt-5" id="appointment_label">
+                                <h5
+                                    class="card-title text-center mt-5"
+                                    id="appointment_label"
+                                >
                                     Choose Appointment OR Update Appointment
                                 </h5>
 
@@ -283,11 +335,54 @@
                                                 Choose Time Slot
                                             </option>
                                         </select>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="time_display"
+                                            disabled
+                                            placeholder="Choose Time Slot"
+                                        />
+                                    </div>
+                                </div>
+
+                                <h5
+                                    class="card-title text-center mt-5"
+                                    id="result_label"
+                                >
+                                    Result
+                                </h5>
+
+                                <div class="form-row" id="result_form">
+                                    <div class="form-group my-2 col-md-12">
+                                        <label>Is Pass</label>
+                                        <textarea
+                                            type="text"
+                                            class="form-control"
+                                            disabled
+                                            rows="1"
+                                            id="result_pass"
+                                        >
+                                        </textarea>
+                                    </div>
+                                    <div class="form-group my-2 col-md-12">
+                                        <label>Feedback</label>
+                                        <textarea
+                                            type="text"
+                                            class="form-control"
+                                            rows="5"
+                                            disabled
+                                            id="result_feedback"
+                                        >
+                                        </textarea>
                                     </div>
                                 </div>
 
                                 <!-- Submit Button -->
-                                <button type="submit" class="btn btn-primary" id="submit_button">
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary"
+                                    id="submit_button"
+                                >
                                     Submit
                                 </button>
                             </form>

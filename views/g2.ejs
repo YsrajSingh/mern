@@ -36,7 +36,6 @@
                     document.getElementById("take_retest");
                 show_user_data.style.display = "none";
                 take_retest_button.style.display = "none";
-
                 // Fetch user data and populate the form
                 fetch(`http://localhost:3000/api/filter/user`, {
                     method: "GET",
@@ -51,6 +50,10 @@
                             if (data?.license_no) {
                                 show_user_data.style.display = "block";
                                 parent_of_form.style.display = "none";
+                                if(data?.test_type === "G"){
+                                    document.getElementById("result_pass").style.display = "none"
+                                    document.getElementById("result_feedback").style.display = "none"
+                                }
                                 document.getElementById(
                                     "table_first_name"
                                 ).innerText = data?.first_name;
@@ -108,7 +111,6 @@
                                 document.getElementById(
                                     "dob_group"
                                 ).style.display = "none";
-
                                 document.getElementById("firstName").value =
                                     data?.first_name;
                                 document.getElementById(
@@ -388,11 +390,11 @@
                                 <th scope="row">Appointment Time</th>
                                 <td id="table_time"></td>
                             </tr>
-                            <tr>
+                            <tr id="result_pass">
                                 <th scope="row">Are you pass ?</th>
                                 <td id="pass_fail"></td>
                             </tr>
-                            <tr>
+                            <tr id="result_feedback">
                                 <th scope="row">Feedback</th>
                                 <td id="feedback"></td>
                             </tr>
